@@ -17,12 +17,18 @@ public class DhcpStrategy extends PublishLogDataStrategy {
 
     @Override
     public void publishLogData(SSRC ssrc, JsonNode rootNode) {
+        Identifier ident1 = Identifiers.createIp4(rootNode.path( "IP" ).getTextValue());
+//test
+//test
     }
 
-    public void blub1(SSRC ssrc, JsonNode rootNode){
+    public void blub(SSRC ssrc, JsonNode node){
+//test
+//test
     }
 
-    public void blub2(SSRC ssrc, JsonNode rootNode){
+    public void blub1(SSRC ssrc, JsonNode node){
+//test
     }
 
 }

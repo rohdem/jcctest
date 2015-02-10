@@ -55,23 +55,49 @@ TOKEN:
     < PACKAGE: "package:" >
   | < CLASS: "class:" >
   | < METHOD: "method:" >
-  | < PUBLISHLOGDATA: "publishLogData:">
-  
+
 }
 
+/* IFMAP WORDS */
 TOKEN:
 {
-    < JAVANAME: (<IDENTIFIER>) >
+    < PUBLISHLOGDATA: "publishLogData:">
+  | < UPDATE: "update:" >
+  | < DELETE: "delete:" >
+  | < NOTIFY: "notify:" >
+  | < IDENTIFIER1: "identifier1 = " >
+  | < IDENTIFIER2: "identifier2 = " >
+  | < METADATA: "metadata = " >
+}
+
+/* IFMAP IDENTIFIERS */
+TOKEN:
+{
+  
+    < IP4: "ip4">
+  | < MAC: "mac">
+  | < DEVICE: "device">
+}
+
+/* IFMAP METADATA */
+TOKEN:
+{
+    < META_IPMAC: "ipmac("< JAVANAME >")" >
+  | < META_DISCOBY: "discoBy("< JAVANAME >")" >
+
+}
+
+
+/* IDENTIFIERS */
+TOKEN:
+{
+    < JAVANAME: <IDENTIFIER> >
 }
 
 TOKEN:
 {  < PACKAGENAME: (<NAME>) >
   | < #NAME:	<IDENTIFIER> ( "." <IDENTIFIER> )* >
 }
-
-
-
-/* IDENTIFIERS */
 
 <DEFAULT> TOKEN : {
 <IDENTIFIER: <LETTER> (<PART_LETTER>)*>
@@ -86,7 +112,8 @@ int root() throws Exception:
   int retValue;
 }    
 { 
-  	  	(	  	<PACKAGE> <PACKAGENAME>
+  	  	(
+  	  	( < EOL > )+	  	<PACKAGE> <PACKAGENAME>
 	  	{
 	  		mWriter.write(
 		  		"package "+token.image+";\n" +
@@ -122,7 +149,7 @@ int classDef() throws Exception:
 }    
 { 
   	
-  	<CLASS> <JAVANAME>
+  	<CLASS> <JAVANAME> 
   	{
 	 	mWriter.write(
 	 		"public class "+token.image+" extends PublishLogDataStrategy {\n"+
@@ -134,50 +161,190 @@ int classDef() throws Exception:
 
 	( < EOL > )+
   	
-  	retValue = publishLogData()
-  		
-	( < EOL > )+
+  	retValue = publishLogData() 
 	
-	( retValue = methodDef() ( < EOL > )+ )+
+	( retValue = methodDef()  )*
   	{
 	 	mWriter.write("}");
-	 	return 0;
+	 	return retValue;
   	}
 }
 
 int publishLogData() throws Exception:   
 {
-  int retValue;
+  int retValue = 0;
 }    
-{   	
+{
+    
 	<PUBLISHLOGDATA>
   	{
 	 	mWriter.write(
 	 	  	"    @Override\n" +
-			"    public void publishLogData(SSRC ssrc, JsonNode rootNode) {\n" +
+			"    public void publishLogData(SSRC ssrc, JsonNode rootNode) {\n"
+	 	);
+  	}
+  	( < EOL > )+  	
+
+	
+	statementDef()
+	{  		mWriter.write(
 			"    }\n"+
 			"\n"
-	 	);
-	 	return 0;
-  	}
+		);
+		return retValue;
+	}
 }
 
 
 int methodDef() throws Exception:   
 {
-  int retValue;
+  int retValue = 0;
 }    
 { 
   	
 	<METHOD> <JAVANAME>
   	{
 	 	mWriter.write(
-	 	  "    public void "+token.image+"(SSRC ssrc, JsonNode rootNode){\n" +
-	 	  "    }\n" +
-	 	  "\n"
+	 	  "    public void "+token.image+"(SSRC ssrc, JsonNode node){\n"
 	 	  );
-	 	return 0;
   	}
+
+  	( < EOL > )+
+
+	statementDef()
+	{
+  		mWriter.write(
+		  "    }\n"+
+		  "\n"
+		  );
+		return retValue;
+	}
+}
+
+
+
+int statementDef() throws Exception:   
+{
+  int retValue = 0;
+}    
+{ 
+  	
+	((retValue = publishUpdate() | retValue = publishDelete() | retValue = publishNotify() ) ( < EOL > )+ )*
+	{
+		return retValue;
+	}
+}
+
+
+
+int publishUpdate() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<UPDATE> ( < EOL > )+
+  	
+	retValue = ifMapIdentifier1()
+	{
+		return retValue;
+	}
+
+}
+
+int publishDelete() throws Exception:   
+{
+  int retValue = 0;
+}    
+{
+	<DELETE>
+  	{
+	 	mWriter.write(
+	 	  	"//test\n"
+	 	);
+	 	return retValue;
+  	}
+
+
+}
+
+int publishNotify() throws Exception:   
+{
+  int retValue = 0;
+}    
+{
+	<NOTIFY>
+  	{
+	 	mWriter.write(
+	 	  	"//test\n"
+	 	);
+	 	return retValue;
+  	}
+
+
+}
+
+int ifMapIdentifier1() throws Exception:   
+{
+	int retValue = 0;
+}    
+{
+	<IDENTIFIER1>
+	{
+	    mWriter.write(
+			"        Identifier ident1 = "
+		);
+	}
+	
+	retValue = ifMapIdentifiers()
+  	{
+	 	return retValue;
+  	}
+}
+
+int ifMapIdentifier2() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<IDENTIFIER2>
+	{
+	    mWriter.write(
+			"        Identifier ident2 = "
+		);
+	}
+	retValue = ifMapIdentifiers()
+  	{
+	 	return retValue;
+  	}
+}
+
+int ifMapIdentifiers() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	retValue = ifMapIp()
+	{
+	  return retValue;
+	}
+}
+
+int ifMapIp() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<IP4>"("<JAVANAME>
+  	{
+	 	mWriter.write(
+	 	  	"Identifiers.createIp4(rootNode.path( \"" + token.image + "\" ).getTextValue());\n"
+	 	);
+  	}
+	")"
+	{
+	  return retValue;
+	}
+
 }
 
 

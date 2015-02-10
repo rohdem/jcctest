@@ -1,11 +1,19 @@
+
 package: de.hshannover.f4.trust.irongenlog.publisher.strategies 
 
 class: DhcpStrategy
 
-publishLogData:
+	publishLogData:
 
-method: blub1
+		update:
+			identifier1 = ip4(IP)
+		notify:
+		notify:
 
-method: blub2
+	method: blub
+		notify:
+		notify:
 
+	method: blub1
+		notify:
 
