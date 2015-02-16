@@ -6,8 +6,13 @@ class: DhcpStrategy
 	publishLogData:
 
 		update:
-			identifier1 = ip4(IP)
+			identifier1 = mac("MAC")			
+			identifier2 = device("DHCPSERVERNAME")
+			meta = discoby()
+			lifetime = session
+									
 		notify:
+				
 		notify:
 
 	method: blub

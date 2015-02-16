@@ -67,24 +67,37 @@ TOKEN:
   | < NOTIFY: "notify:" >
   | < IDENTIFIER1: "identifier1 = " >
   | < IDENTIFIER2: "identifier2 = " >
-  | < METADATA: "metadata = " >
+  | < METADATA: "meta = " >
+  | < METALIFETIME: "lifetime = " >
 }
 
 /* IFMAP IDENTIFIERS */
 TOKEN:
 {
-  
-    < IP4: "ip4">
+    < AR: "ar" >
+  | < ARRAND: "arrandom" >
+  | < ARRANDUUID: "arrandomuuid" >
+  | < DEV: "device">
+  | < DEVRAND: "devrandom">
+  | < DEVRANDUUID: "devrandomuuid">
+  | < IP4: "ip4">
+  | < IP6: "ip6">
   | < MAC: "mac">
-  | < DEVICE: "device">
 }
 
 /* IFMAP METADATA */
 TOKEN:
 {
-    < META_IPMAC: "ipmac("< JAVANAME >")" >
-  | < META_DISCOBY: "discoBy("< JAVANAME >")" >
-
+    < METALIFETIMESESSION: "session" >
+  | < METALIFETIMEFOREVER: "forever" >
+  | < META_ARDEV: "ardev" >
+  | < META_ARIP: "arip" >
+  | < META_ARMAC: "armac" >
+  | < META_AUTHAS: "authas" >
+  | < META_AUTHBY: "authby" >
+  | < META_DEVIP: "devip" >
+  | < META_DISCOBY: "discoby" >
+  | < META_IPMAC: "ipmac" >
 }
 
 
@@ -121,7 +134,6 @@ int root() throws Exception:
 				"import java.util.logging.Logger;\n"		+	
 				"import org.codehaus.jackson.JsonNode;\n" +
 				"import org.w3c.dom.Document;\n" +
-				"import de.hshannover.f4.trust.ifmapj.*;\n" +
 				"import de.hshannover.f4.trust.ifmapj.binding.*;\n" +
 				"import de.hshannover.f4.trust.ifmapj.channel.*;\n" +
 				"import de.hshannover.f4.trust.ifmapj.exception.*;\n" +			
@@ -205,7 +217,7 @@ int methodDef() throws Exception:
 	<METHOD> <JAVANAME>
   	{
 	 	mWriter.write(
-	 	  "    public void "+token.image+"(SSRC ssrc, JsonNode node){\n"
+	 	  "    public void "+token.image+"(SSRC ssrc, JsonNode rootNode){\n"
 	 	  );
   	}
 
@@ -229,7 +241,7 @@ int statementDef() throws Exception:
 }    
 { 
   	
-	((retValue = publishUpdate() | retValue = publishDelete() | retValue = publishNotify() ) ( < EOL > )+ )*
+	((retValue = publishUpdate() | retValue = publishDelete() | retValue = publishNotify() ) ( < EOL > )+ )+
 	{
 		return retValue;
 	}
@@ -243,10 +255,37 @@ int publishUpdate() throws Exception:
 }    
 {   	
 	<UPDATE> ( < EOL > )+
-  	
-	retValue = ifMapIdentifier1()
 	{
-		return retValue;
+	    mWriter.write(
+	        "        {\n"+	          
+	        "        try {\n"
+		);	  
+	}
+  	
+	retValue = ifMapIdentifier1() ( < EOL > )+
+
+	
+	[retValue = ifMapIdentifier2() ( < EOL > )+]
+
+	retValue = ifMapMeta() ( < EOL > )+
+	{
+	    mWriter.write(
+	      	"            PublishUpdate publishUpdate = Requests.createPublishUpdate(ident1, ident2, docMeta,"
+	 	);	  
+	}
+
+	retValue = ifMapMetaLifetime() 
+	{
+	    mWriter.write(
+	      	"            ssrc.publish(Requests.createPublishReq(publishUpdate));\n" +
+	 	  	"        } catch (IfmapErrorResult e) {\n" +
+			"            LOGGER.severe(\"Error publishing update data: \" + e);\n" +
+			"        } catch (IfmapException e) {\n" +
+			"            LOGGER.severe(\"Error publishing update data: \" + e);\n" +
+			"        }\n" +
+			"        }\n"
+	    );
+	    return retValue;
 	}
 
 }
@@ -291,7 +330,7 @@ int ifMapIdentifier1() throws Exception:
 	<IDENTIFIER1>
 	{
 	    mWriter.write(
-			"        Identifier ident1 = "
+			"            Identifier ident1 = "
 		);
 	}
 	
@@ -309,7 +348,7 @@ int ifMapIdentifier2() throws Exception:
 	<IDENTIFIER2>
 	{
 	    mWriter.write(
-			"        Identifier ident2 = "
+			"            Identifier ident2 = "
 		);
 	}
 	retValue = ifMapIdentifiers()
@@ -318,36 +357,335 @@ int ifMapIdentifier2() throws Exception:
   	}
 }
 
+int ifMapMeta() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<METADATA>
+	{
+	    mWriter.write(
+			"            Document docMeta = "
+		);
+	}
+	retValue = ifMapMetas()
+  	{
+	 	return retValue;
+  	}
+}
+
+int ifMapMetaLifetime() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<METALIFETIME> (< METALIFETIMESESSION > | < METALIFETIMEFOREVER >)
+	{
+	    mWriter.write(
+			" MetadataLifetime." + token.image + ");\n"
+		);
+		return retValue;
+	}
+}
+
 int ifMapIdentifiers() throws Exception:   
 {
 	int retValue = 0;
 }    
 {   	
-	retValue = ifMapIp()
+	(
+	    retValue = ifMapAr()
+	  | retValue = ifMapArRand()
+	  | retValue = ifMapArRandUuid()
+	  | retValue = ifMapDevice()
+	  | retValue = ifMapDeviceRandom()
+	  | retValue = ifMapDeviceRandomUuid()
+	  | retValue = ifMapIp4()
+	  | retValue = ifMapIp6()
+	  | retValue = ifMapMac()
+	)
 	{
 	  return retValue;
 	}
 }
 
-int ifMapIp() throws Exception:   
+int ifMapMetas() throws Exception:   
 {
 	int retValue = 0;
 }    
 {   	
-	<IP4>"("<JAVANAME>
+	(
+	    retValue = ifMapArDev()
+	  | retValue = ifMapArIp()
+	  | retValue = ifMapArMac()
+	  | retValue = ifMapAuthAs()
+	  | retValue = ifMapAuthBy()
+	  | retValue = ifMapDevIp()
+	  | retValue = ifMapDiscoBy()
+	  | retValue = ifMapIpMac()
+	)
+	{
+	  return retValue;
+	}
+}
+
+// IFMAP IDENTIFIER ============================================================================================
+
+
+int ifMapAr() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<AR>"(\""<JAVANAME>
+  	{
+	 	mWriter.write(
+	 	  	"Identifiers.createAr(rootNode.path( \"" + token.image + "\" ).getTextValue());\n"
+	 	);
+  	}
+	"\")"
+	{
+	  return retValue;
+	}
+}
+
+int ifMapArRand() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<ARRAND>"()"
+  	{
+	 	mWriter.write(
+	 	  	"Identifiers.createArRandom(rootNode.path( \"" + token.image + "\" ).getTextValue());\n"
+	 	);
+        return retValue;
+	}
+}
+
+int ifMapArRandUuid() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<ARRANDUUID>"()"
+  	{
+	 	mWriter.write(
+	 	  	"Identifiers.createArRandomUuid(rootNode.path( \"" + token.image + "\" ).getTextValue());\n"
+	 	);
+        return retValue;
+	}
+}
+
+int ifMapDevice() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<DEV>"(\""<JAVANAME>
+  	{
+	 	mWriter.write(
+	 	  	"Identifiers.createDev(rootNode.path( \"" + token.image + "\" ).getTextValue());\n"
+	 	);
+  	}
+	"\")"
+	{
+	  return retValue;
+	}
+}
+
+int ifMapDeviceRandom() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<DEVRAND>"()"
+  	{
+	 	mWriter.write(
+	 	  	"Identifiers.createDevRandom();\n"
+	 	);
+        return retValue;
+	}
+}
+
+int ifMapDeviceRandomUuid() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<DEVRANDUUID>"()"
+  	{
+	 	mWriter.write(
+	 	  	"Identifiers.createDevRandomUuid();\n"
+	 	);
+	    return retValue;
+	}
+}
+
+int ifMapIp4() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<IP4>"(\""<JAVANAME>
   	{
 	 	mWriter.write(
 	 	  	"Identifiers.createIp4(rootNode.path( \"" + token.image + "\" ).getTextValue());\n"
 	 	);
   	}
-	")"
+	"\")"
 	{
 	  return retValue;
 	}
-
 }
 
+int ifMapIp6() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<IP6>"(\""<JAVANAME>
+  	{
+	 	mWriter.write(
+	 	  	"Identifiers.createIp6(rootNode.path( \"" + token.image + "\" ).getTextValue());\n"
+	 	);
+  	}
+	"\")"
+	{
+	  return retValue;
+	}
+}
 
+int ifMapMac() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<MAC>"(\""<JAVANAME>
+  	{
+	 	mWriter.write(
+	 	  	"Identifiers.createMac(rootNode.path( \"" + token.image + "\" ).getTextValue());\n"
+	 	);
+  	}
+	"\")"
+	{
+	  return retValue;
+	}
+}
+
+// METADATA =======================================================================================================
+
+int ifMapArDev() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<META_ARDEV>"()"
+  	{
+	 	mWriter.write(
+	 	  	"getMetadataFactory().createArDev();\n"
+	 	);
+	 	return retValue;
+  	}
+}
+
+int ifMapArIp() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<META_ARIP>"()"
+  	{
+	 	mWriter.write(
+	 	  	"getMetadataFactory().createArIp();\n"
+	 	);
+	 	return retValue;
+  	}
+}
+
+int ifMapArMac() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<META_ARMAC>"()"
+  	{
+	 	mWriter.write(
+	 	  	"getMetadataFactory().createArMac();\n"
+	 	);
+	 	return retValue;
+  	}
+}
+
+int ifMapAuthAs() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<META_AUTHAS>"()"
+  	{
+	 	mWriter.write(
+	 	  	"getMetadataFactory().createAuthAs();\n"
+	 	);
+	 	return retValue;
+  	}
+}
+
+int ifMapAuthBy() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<META_AUTHBY>"()"
+  	{
+	 	mWriter.write(
+	 	  	"getMetadataFactory().createAuthBy();\n"
+	 	);
+	 	return retValue;
+  	}
+}
+
+int ifMapDevIp() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<META_DEVIP>"()"
+  	{
+	 	mWriter.write(
+	 	  	"getMetadataFactory().createDevIp();\n"
+	 	);
+	 	return retValue;
+  	}
+}
+
+int ifMapDiscoBy() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<META_DISCOBY>"()"
+  	{
+	 	mWriter.write(
+	 	  	"getMetadataFactory().createDiscoveredBy();\n"
+	 	);
+	 	return retValue;
+  	}
+}
+
+int ifMapIpMac() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<META_IPMAC>"()"
+  	{
+	 	mWriter.write(
+	 	  	"getMetadataFactory().createIpMac();\n"
+	 	);
+	 	return retValue;
+  	}
+}
 
 
 

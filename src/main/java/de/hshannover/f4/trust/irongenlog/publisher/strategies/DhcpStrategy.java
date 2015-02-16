@@ -3,7 +3,6 @@ package de.hshannover.f4.trust.irongenlog.publisher.strategies;
 import java.util.logging.Logger;
 import org.codehaus.jackson.JsonNode;
 import org.w3c.dom.Document;
-import de.hshannover.f4.trust.ifmapj.*;
 import de.hshannover.f4.trust.ifmapj.binding.*;
 import de.hshannover.f4.trust.ifmapj.channel.*;
 import de.hshannover.f4.trust.ifmapj.exception.*;
@@ -17,17 +16,29 @@ public class DhcpStrategy extends PublishLogDataStrategy {
 
     @Override
     public void publishLogData(SSRC ssrc, JsonNode rootNode) {
-        Identifier ident1 = Identifiers.createIp4(rootNode.path( "IP" ).getTextValue());
+        {
+        try {
+            Identifier ident1 = Identifiers.createMac(rootNode.path( "MAC" ).getTextValue());
+            Identifier ident2 = Identifiers.createDev(rootNode.path( "DHCPSERVERNAME" ).getTextValue());
+            Document docMeta = getMetadataFactory().createDiscoveredBy();
+            PublishUpdate publishUpdate = Requests.createPublishUpdate(ident1, ident2, docMeta, MetadataLifetime.session);
+            ssrc.publish(Requests.createPublishReq(publishUpdate));
+        } catch (IfmapErrorResult e) {
+            LOGGER.severe("Error publishing update data: " + e);
+        } catch (IfmapException e) {
+            LOGGER.severe("Error publishing update data: " + e);
+        }
+        }
 //test
 //test
     }
 
-    public void blub(SSRC ssrc, JsonNode node){
+    public void blub(SSRC ssrc, JsonNode rootNode){
 //test
 //test
     }
 
-    public void blub1(SSRC ssrc, JsonNode node){
+    public void blub1(SSRC ssrc, JsonNode rootNode){
 //test
     }
 
