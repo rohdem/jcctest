@@ -7,18 +7,24 @@ class: DhcpStrategy
 
 		update:
 			identifier1 = mac("MAC")			
-			identifier2 = device("DHCPSERVERNAME")
-			meta = discoby()
+			identifier2 = dev("DHCPSERVERNAME")
+			meta = discoBy()
 			lifetime = session
+		
+		delete:
+			identifier1 = mac("MAC")
+			identifier2 = dev("DHCPSERVERNAME")
+			deleteString = blub
 									
 		notify:
-				
-		notify:
+			identifier1 = mac("MAC")
+			identifier2 = dev("DHCPSERVERNAME")
+			meta = discoBy()
 
 	method: blub
-		notify:
-		notify:
 
-	method: blub1
-		notify:
+		delete:
+			identifier1 = mac("MAC")
+			deleteString = blub
+
 

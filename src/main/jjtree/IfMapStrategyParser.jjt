@@ -69,17 +69,18 @@ TOKEN:
   | < IDENTIFIER2: "identifier2 = " >
   | < METADATA: "meta = " >
   | < METALIFETIME: "lifetime = " >
+  | < METADELETESTRING: "deleteString = " >
 }
 
 /* IFMAP IDENTIFIERS */
 TOKEN:
 {
     < AR: "ar" >
-  | < ARRAND: "arrandom" >
-  | < ARRANDUUID: "arrandomuuid" >
-  | < DEV: "device">
-  | < DEVRAND: "devrandom">
-  | < DEVRANDUUID: "devrandomuuid">
+  | < ARRAND: "arRandom" >
+  | < ARRANDUUID: "arRandomUuid" >
+  | < DEV: "dev">
+  | < DEVRAND: "devRandom">
+  | < DEVRANDUUID: "devRandomUuid">
   | < IP4: "ip4">
   | < IP6: "ip6">
   | < MAC: "mac">
@@ -90,14 +91,14 @@ TOKEN:
 {
     < METALIFETIMESESSION: "session" >
   | < METALIFETIMEFOREVER: "forever" >
-  | < META_ARDEV: "ardev" >
-  | < META_ARIP: "arip" >
-  | < META_ARMAC: "armac" >
-  | < META_AUTHAS: "authas" >
-  | < META_AUTHBY: "authby" >
-  | < META_DEVIP: "devip" >
-  | < META_DISCOBY: "discoby" >
-  | < META_IPMAC: "ipmac" >
+  | < META_ARDEV: "arDev" >
+  | < META_ARIP: "arIp" >
+  | < META_ARMAC: "arMac" >
+  | < META_AUTHAS: "authAs" >
+  | < META_AUTHBY: "authBy" >
+  | < META_DEVIP: "devIp" >
+  | < META_DISCOBY: "discoBy" >
+  | < META_IPMAC: "ipMac" >
 }
 
 
@@ -252,6 +253,7 @@ int statementDef() throws Exception:
 int publishUpdate() throws Exception:   
 {
 	int retValue = 0;
+	boolean optionalIdentifier = false;
 }    
 {   	
 	<UPDATE> ( < EOL > )+
@@ -265,13 +267,18 @@ int publishUpdate() throws Exception:
 	retValue = ifMapIdentifier1() ( < EOL > )+
 
 	
-	[retValue = ifMapIdentifier2() ( < EOL > )+]
+	[{optionalIdentifier = true;} retValue = ifMapIdentifier2() ( < EOL > )+]
 
 	retValue = ifMapMeta() ( < EOL > )+
 	{
-	    mWriter.write(
-	      	"            PublishUpdate publishUpdate = Requests.createPublishUpdate(ident1, ident2, docMeta,"
-	 	);	  
+	    if(optionalIdentifier){			mWriter.write(
+			  	"            PublishUpdate publishUpdate = Requests.createPublishUpdate(ident1, ident2, docMeta,"
+			);
+		}else{
+		  	mWriter.write(
+			  	"            PublishUpdate publishUpdate = Requests.createPublishUpdate(ident1, docMeta,"
+			);		}
+	 	  
 	}
 
 	retValue = ifMapMetaLifetime() 
@@ -293,15 +300,54 @@ int publishUpdate() throws Exception:
 int publishDelete() throws Exception:   
 {
   int retValue = 0;
+  boolean optionalIdentifier = false;
+  boolean optionalDeleteString = false;
 }    
 {
-	<DELETE>
-  	{
-	 	mWriter.write(
-	 	  	"//test\n"
-	 	);
-	 	return retValue;
-  	}
+	<DELETE> ( < EOL > )+
+	{
+	    mWriter.write(
+	        "        {\n"+	          
+	        "        try {\n"
+		);	  
+	}
+  	
+	retValue = ifMapIdentifier1()
+	
+	[LOOKAHEAD(10) {optionalIdentifier = true;} ( < EOL > )+ retValue = ifMapIdentifier2() ]
+
+	[LOOKAHEAD(10) {optionalDeleteString = true;} ( < EOL > )+ retValue = ifMapMetaDeleteString() ]
+	{
+	    if(optionalIdentifier && optionalDeleteString){
+			mWriter.write(
+			  	"            PublishDelete publishDelete = Requests.createPublishDelete(ident1, ident2, metaDeleteString);\n"
+			);
+		}else if(!optionalIdentifier && optionalDeleteString){
+		  	mWriter.write(
+			  	"            PublishDelete publishDelete = Requests.createPublishDelete(ident1, metaDeleteString);\n"
+			);
+		}else if(!optionalIdentifier && !optionalDeleteString){
+		  	mWriter.write(
+			  	"            PublishDelete publishDelete = Requests.createPublishDelete(ident1);\n"
+			);
+		}else if(optionalIdentifier && !optionalDeleteString){
+		  	mWriter.write(
+			  	"            PublishDelete publishDelete = Requests.createPublishDelete(ident1, ident2);\n"
+			);
+		}
+		
+	 	  
+	    mWriter.write(
+	      	"            ssrc.publish(Requests.createPublishReq(publishDelete));\n" +
+	 	  	"        } catch (IfmapErrorResult e) {\n" +
+			"            LOGGER.severe(\"Error publishing update data: \" + e);\n" +
+			"        } catch (IfmapException e) {\n" +
+			"            LOGGER.severe(\"Error publishing update data: \" + e);\n" +
+			"        }\n" +
+			"        }\n"
+	    );
+	    return retValue;
+	}
 
 
 }
@@ -309,16 +355,45 @@ int publishDelete() throws Exception:
 int publishNotify() throws Exception:   
 {
   int retValue = 0;
+  boolean optionalIdentifier = false;
 }    
 {
-	<NOTIFY>
-  	{
-	 	mWriter.write(
-	 	  	"//test\n"
-	 	);
-	 	return retValue;
-  	}
+	<NOTIFY> ( < EOL > )+
+	{
+	    mWriter.write(
+	        "        {\n"+	          
+	        "        try {\n"
+		);	  
+	}
+  	
+	retValue = ifMapIdentifier1() ( < EOL > )+
 
+	
+	[{optionalIdentifier = true;} retValue = ifMapIdentifier2() ( < EOL > )+]
+
+	retValue = ifMapMeta()
+	{
+	    if(optionalIdentifier){
+			mWriter.write(
+			  	"            PublishNotify publishNotify = Requests.createPublishNotify(ident1, ident2, docMeta);\n"
+			);
+		}else{
+		  	mWriter.write(
+			  	"            PublishNotify publishNotify = Requests.createPublishNotify(ident1, docMeta);\n"
+			);
+		}
+
+	    mWriter.write(
+	      	"            ssrc.publish(Requests.createPublishReq(publishNotify));\n" +
+	 	  	"        } catch (IfmapErrorResult e) {\n" +
+			"            LOGGER.severe(\"Error publishing update data: \" + e);\n" +
+			"        } catch (IfmapException e) {\n" +
+			"            LOGGER.severe(\"Error publishing update data: \" + e);\n" +
+			"        }\n" +
+			"        }\n"
+	    );
+	    return retValue;
+	}
 
 }
 
@@ -383,6 +458,20 @@ int ifMapMetaLifetime() throws Exception:
 	{
 	    mWriter.write(
 			" MetadataLifetime." + token.image + ");\n"
+		);
+		return retValue;
+	}
+}
+
+int ifMapMetaDeleteString() throws Exception:
+{
+	int retValue = 0;
+}    
+{   	
+	<METADELETESTRING> <JAVANAME> 
+	{
+	    mWriter.write(
+			"            String metaDeleteString = \"" + token.image + "\";\n"
 		);
 		return retValue;
 	}

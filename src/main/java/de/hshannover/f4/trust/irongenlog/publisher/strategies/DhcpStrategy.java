@@ -29,17 +29,47 @@ public class DhcpStrategy extends PublishLogDataStrategy {
             LOGGER.severe("Error publishing update data: " + e);
         }
         }
-//test
-//test
+        {
+        try {
+            Identifier ident1 = Identifiers.createMac(rootNode.path( "MAC" ).getTextValue());
+            Identifier ident2 = Identifiers.createDev(rootNode.path( "DHCPSERVERNAME" ).getTextValue());
+            String metaDeleteString = "blub";
+            PublishDelete publishDelete = Requests.createPublishDelete(ident1, ident2, metaDeleteString);
+            ssrc.publish(Requests.createPublishReq(publishDelete));
+        } catch (IfmapErrorResult e) {
+            LOGGER.severe("Error publishing update data: " + e);
+        } catch (IfmapException e) {
+            LOGGER.severe("Error publishing update data: " + e);
+        }
+        }
+        {
+        try {
+            Identifier ident1 = Identifiers.createMac(rootNode.path( "MAC" ).getTextValue());
+            Identifier ident2 = Identifiers.createDev(rootNode.path( "DHCPSERVERNAME" ).getTextValue());
+            Document docMeta = getMetadataFactory().createDiscoveredBy();
+            PublishNotify publishNotify = Requests.createPublishNotify(ident1, ident2, docMeta);
+            ssrc.publish(Requests.createPublishReq(publishNotify));
+        } catch (IfmapErrorResult e) {
+            LOGGER.severe("Error publishing update data: " + e);
+        } catch (IfmapException e) {
+            LOGGER.severe("Error publishing update data: " + e);
+        }
+        }
     }
 
     public void blub(SSRC ssrc, JsonNode rootNode){
-//test
-//test
-    }
-
-    public void blub1(SSRC ssrc, JsonNode rootNode){
-//test
+        {
+        try {
+            Identifier ident1 = Identifiers.createMac(rootNode.path( "MAC" ).getTextValue());
+            String metaDeleteString = "blub";
+            PublishDelete publishDelete = Requests.createPublishDelete(ident1, metaDeleteString);
+            ssrc.publish(Requests.createPublishReq(publishDelete));
+        } catch (IfmapErrorResult e) {
+            LOGGER.severe("Error publishing update data: " + e);
+        } catch (IfmapException e) {
+            LOGGER.severe("Error publishing update data: " + e);
+        }
+        }
     }
 
 }
