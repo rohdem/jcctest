@@ -14,8 +14,8 @@ class: DhcpStrategy
 		delete:
 			identifier1 = mac("MAC")
 			identifier2 = dev("DHCPSERVERNAME")
-			deleteString = blub
-									
+			deleteString = "meta:ip-mac[@ifmap-publisher-id='" + ssrc.getPublisherId() + "']"
+												
 		notify:
 			identifier1 = mac("MAC")
 			identifier2 = dev("DHCPSERVERNAME")
@@ -25,6 +25,6 @@ class: DhcpStrategy
 
 		delete:
 			identifier1 = mac("MAC")
-			deleteString = blub
+			deleteString = "meta:ip-mac[@ifmap-publisher-id='" + ssrc.getPublisherId() + "']"
 
 

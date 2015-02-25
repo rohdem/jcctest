@@ -106,6 +106,9 @@ TOKEN:
 TOKEN:
 {
     < JAVANAME: <IDENTIFIER> >
+    | < SEARCHSTRING: "\"" <IDENTIFIER> (<SEARCHSTRINGTOKEN>)* "\"" >
+ 	| < #SEARCHSTRINGTOKEN: (<IDENTIFIER> | ":" | "=" | "@" | "-" | "(" | ")" | "[" | "]" | " " | "'" | "+" | "." | "\"") >
+ 	| < JSONSTRINGNAME: ("\"" <IDENTIFIER> "\"") >
 }
 
 TOKEN:
@@ -468,10 +471,10 @@ int ifMapMetaDeleteString() throws Exception:
 	int retValue = 0;
 }    
 {   	
-	<METADELETESTRING> <JAVANAME> 
+	<METADELETESTRING> <SEARCHSTRING> 
 	{
 	    mWriter.write(
-			"            String metaDeleteString = \"" + token.image + "\";\n"
+			"            String metaDeleteString = " + token.image + ";\n"
 		);
 		return retValue;
 	}

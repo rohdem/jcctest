@@ -33,7 +33,7 @@ public class DhcpStrategy extends PublishLogDataStrategy {
         try {
             Identifier ident1 = Identifiers.createMac(rootNode.path( "MAC" ).getTextValue());
             Identifier ident2 = Identifiers.createDev(rootNode.path( "DHCPSERVERNAME" ).getTextValue());
-            String metaDeleteString = "blub";
+            String metaDeleteString = "meta:ip-mac[@ifmap-publisher-id='" + ssrc.getPublisherId() + "']";
             PublishDelete publishDelete = Requests.createPublishDelete(ident1, ident2, metaDeleteString);
             ssrc.publish(Requests.createPublishReq(publishDelete));
         } catch (IfmapErrorResult e) {
@@ -61,7 +61,7 @@ public class DhcpStrategy extends PublishLogDataStrategy {
         {
         try {
             Identifier ident1 = Identifiers.createMac(rootNode.path( "MAC" ).getTextValue());
-            String metaDeleteString = "blub";
+            String metaDeleteString = "meta:ip-mac[@ifmap-publisher-id='" + ssrc.getPublisherId() + "']";
             PublishDelete publishDelete = Requests.createPublishDelete(ident1, metaDeleteString);
             ssrc.publish(Requests.createPublishReq(publishDelete));
         } catch (IfmapErrorResult e) {
