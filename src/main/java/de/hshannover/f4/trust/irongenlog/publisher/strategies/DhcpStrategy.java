@@ -18,7 +18,7 @@ public class DhcpStrategy extends PublishLogDataStrategy {
     public void publishLogData(SSRC ssrc, JsonNode rootNode) {
         {
         try {
-            Identifier ident1 = Identifiers.createMac(rootNode.path( "MAC" ).getTextValue());
+            Identifier ident1 = Identifiers.createAr(rootNode.path( "MAC" ).getTextValue());
             Identifier ident2 = Identifiers.createDev(rootNode.path( "DHCPSERVERNAME" ).getTextValue());
             Document docMeta = getMetadataFactory().createDiscoveredBy();
             PublishUpdate publishUpdate = Requests.createPublishUpdate(ident1, ident2, docMeta, MetadataLifetime.session);
@@ -60,7 +60,7 @@ public class DhcpStrategy extends PublishLogDataStrategy {
     public void blub(SSRC ssrc, JsonNode rootNode){
         {
         try {
-            Identifier ident1 = Identifiers.createMac(rootNode.path( "MAC" ).getTextValue());
+            Identifier ident1 = Identifiers.createOtherIdentity(rootNode.path( "blib" ).getTextValue(), rootNode.path( "blab" ).getTextValue(), rootNode.path( "blub" ).getTextValue(), rootNode.path( "Blob" ).getTextValue());
             String metaDeleteString = "meta:ip-mac[@ifmap-publisher-id='" + ssrc.getPublisherId() + "']";
             PublishDelete publishDelete = Requests.createPublishDelete(ident1, metaDeleteString);
             ssrc.publish(Requests.createPublishReq(publishDelete));

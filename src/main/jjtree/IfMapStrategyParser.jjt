@@ -76,16 +76,35 @@ TOKEN:
 TOKEN:
 {
     < AR: "ar" >
+  | < ARPUBPREF: "arPubPrefixed">
   | < ARRAND: "arRandom" >
   | < ARRANDUUID: "arRandomUuid" >
   | < DEV: "dev">
+  | < DEVPUBPREF: "devPubPrefixed">
   | < DEVRAND: "devRandom">
   | < DEVRANDUUID: "devRandomUuid">
+  | < IDENTITY: "identity">
+  | < IDENTITYOTHER: "identityOther">
   | < IP4: "ip4">
   | < IP6: "ip6">
   | < MAC: "mac">
 }
 
+/* IFMAP IDENTITY TYPES */
+TOKEN:
+{
+    < AIKNAME: "aikName" >
+  | < DISTINGUISHEDNAME: "distinguishedName" >
+  | < DNSNAME: "dnsName" >
+  | < EMAILADDRESS: "emailAddress" >
+  | < HIPHIT: "hipHit" >
+  | < KERBEROSPRINCIPAL: "kerberosPrincipal" >
+  | < SIPURI: "sipUri" >
+  | < TELURI: "telUri" >
+  | < USERNAME: "userName" >
+}
+
+  
 /* IFMAP METADATA */
 TOKEN:
 {
@@ -487,11 +506,15 @@ int ifMapIdentifiers() throws Exception:
 {   	
 	(
 	    retValue = ifMapAr()
+	  | retValue = ifMapArPubPref()
 	  | retValue = ifMapArRand()
 	  | retValue = ifMapArRandUuid()
 	  | retValue = ifMapDevice()
+	  | retValue = ifMapDevicePubPref()
 	  | retValue = ifMapDeviceRandom()
 	  | retValue = ifMapDeviceRandomUuid()
+	  | retValue = ifMapIdentity()
+	  | retValue = ifMapIdentityOther()
 	  | retValue = ifMapIp4()
 	  | retValue = ifMapIp6()
 	  | retValue = ifMapMac()
@@ -527,46 +550,156 @@ int ifMapMetas() throws Exception:
 int ifMapAr() throws Exception:   
 {
 	int retValue = 0;
+	boolean extension = false;
 }    
 {   	
-	<AR>"(\""<JAVANAME>
+		<AR>"(\""<JAVANAME>
   	{
 	 	mWriter.write(
-	 	  	"Identifiers.createAr(rootNode.path( \"" + token.image + "\" ).getTextValue());\n"
+	 	  	"Identifiers.createAr(rootNode.path( \"" + token.image + "\" ).getTextValue()"
 	 	);
   	}
+
+	("\")" | {extension = true;} "\",\"" <JAVANAME> )
+	{
+	  if(!extension){	    mWriter.write(
+	 	  	");\n"
+	 	);
+	 	return retValue;
+	  }else{
+	    mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);	  }	  
+	}
+	
 	"\")"
 	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
 	  return retValue;
 	}
+	
+}
+
+int ifMapArPubPref() throws Exception:   
+{
+	int retValue = 0;
+	boolean extension = false;
+}    
+{   	
+	
+	<ARPUBPREF>"(\""<JAVANAME>
+  	{
+	 	mWriter.write(
+	 	  	"Identifiers.createArPubPrefixed(rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+  	}
+
+  	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+	
+	("\")" | {extension = true;} "\",\"" <JAVANAME> )
+	{
+	  if(!extension){
+	    mWriter.write(
+	 	  	");\n"
+	 	);
+	 	return retValue;
+	  }else{
+	    mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	  }	  
+	}
+	
+	"\")"
+	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
+	  return retValue;
+	}
+	
 }
 
 int ifMapArRand() throws Exception:   
 {
 	int retValue = 0;
+	boolean extension = false;
 }    
 {   	
-	<ARRAND>"()"
+	<ARRAND>
   	{
 	 	mWriter.write(
-	 	  	"Identifiers.createArRandom(rootNode.path( \"" + token.image + "\" ).getTextValue());\n"
+	 	  	"Identifiers.createArRandom("
 	 	);
-        return retValue;
 	}
+	
+	("()" | {extension = true;} "(\"" <JAVANAME> )
+	{
+	  if(!extension){
+	    mWriter.write(
+	 	  	");\n"
+	 	);
+	 	return retValue;
+	  }else{
+	    mWriter.write(
+	 	  	" rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	  }	  
+	}
+	
+	"\")"
+	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
+	  return retValue;
+	}
+	
 }
 
 int ifMapArRandUuid() throws Exception:   
 {
 	int retValue = 0;
+	boolean extension = false;
 }    
 {   	
-	<ARRANDUUID>"()"
+	<ARRANDUUID>
   	{
 	 	mWriter.write(
-	 	  	"Identifiers.createArRandomUuid(rootNode.path( \"" + token.image + "\" ).getTextValue());\n"
+	 	  	"Identifiers.createArRandomUuid("
 	 	);
-        return retValue;
 	}
+	
+	("()" | {extension = true;} "(\"" <JAVANAME> )
+	{
+	  if(!extension){
+	    mWriter.write(
+	 	  	");\n"
+	 	);
+	 	return retValue;
+	  }else{
+	    mWriter.write(
+	 	  	" rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	  }	  
+	}
+	
+	"\")"
+	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
+	  return retValue;
+	}
+
+	
 }
 
 int ifMapDevice() throws Exception:   
@@ -584,6 +717,35 @@ int ifMapDevice() throws Exception:
 	{
 	  return retValue;
 	}
+}
+
+int ifMapDevicePubPref() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<DEVPUBPREF>"(\""<JAVANAME>
+  	{
+	 	mWriter.write(
+	 	  	"Identifiers.createDevPubPrefixed(rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+  	}
+
+  	"\",\""<JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+	
+	"\")"
+	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
+	  return retValue;
+	}
+
 }
 
 int ifMapDeviceRandom() throws Exception:   
@@ -614,19 +776,194 @@ int ifMapDeviceRandomUuid() throws Exception:
 	}
 }
 
+int ifMapIdentity() throws Exception:
+{
+	int retValue = 0;
+	int type = 0;
+	boolean extension = false;
+}    
+{   	
+	<IDENTITY>"("
+	(	  {type = 1;} <AIKNAME>
+	| {type = 2;} <DISTINGUISHEDNAME>
+	| {type = 3;} <DNSNAME>
+	| {type = 4;} <EMAILADDRESS>
+	| {type = 5;} <HIPHIT>
+	| {type = 6;} <KERBEROSPRINCIPAL>
+	| {type = 7;} <SIPURI>
+	| {type = 8;} <TELURI>
+	| {type = 9;} <USERNAME>
+	)
+  	{
+	 	mWriter.write(
+	 	  	"Identifiers.createIdentity("
+	 	);
+
+		switch (type) {
+            case 1:
+            	mWriter.write(
+	 	  			"IdentityType.aikName"
+	 			);
+            	break;
+            case 2:
+            	mWriter.write(
+	 	  			"IdentityType.distinguishedName"
+	 			);
+            	break;
+            case 3:
+            	mWriter.write(
+	 	  			"IdentityType.dnsName"
+	 			);
+            	break;
+            case 4:
+            	mWriter.write(
+	 	  			"IdentityType.emailAddress"
+	 			);
+            	break;
+            case 5:
+            	mWriter.write(
+	 	  			"IdentityType.hipHit"
+	 			);
+            	break;
+            case 6:
+            	mWriter.write(
+	 	  			"IdentityType.kerberosPrincipal"
+	 			);
+            	break;
+            case 7:
+            	mWriter.write(
+	 	  			"IdentityType.sipUri"
+	 			);
+            	break;
+            case 8:
+            	mWriter.write(
+	 	  			"IdentityType.telUri"
+	 			);
+            	break;
+            case 9:
+            	mWriter.write(
+	 	  			"IdentityType.userName"
+	 			);
+            	break;
+            default: return -1;
+                     break;
+    	}
+	 	
+  	}
+
+  	",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}  	
+
+	("\")" | {extension = true;} "\",\"" <JAVANAME> )
+	{
+	  if(!extension){
+	    mWriter.write(
+	 	  	");\n"
+	 	);
+	 	return retValue;
+	  }else{
+	    mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	  }	  
+	}
+	
+	"\")"
+	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
+	  return retValue;
+	}
+}
+
+int ifMapIdentityOther() throws Exception:
+{
+	int retValue = 0;
+	boolean extension = false;
+}    
+{   	
+	<IDENTITYOTHER>"(\""<JAVANAME>
+  	{
+	 	mWriter.write(
+	 	  	"Identifiers.createOtherIdentity(rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+  	}
+
+  	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+
+	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}  
+
+	("\")" | {extension = true;} "\",\"" <JAVANAME> )
+	{
+	  if(!extension){
+	    mWriter.write(
+	 	  	");\n"
+	 	);
+	 	return retValue;
+	  }else{
+	    mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	  }	  
+	}
+	
+	"\")"
+	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
+	  return retValue;
+	}
+}
+
+
 int ifMapIp4() throws Exception:   
 {
 	int retValue = 0;
+	boolean extension = false;
 }    
 {   	
 	<IP4>"(\""<JAVANAME>
   	{
 	 	mWriter.write(
-	 	  	"Identifiers.createIp4(rootNode.path( \"" + token.image + "\" ).getTextValue());\n"
+	 	  	"Identifiers.createIp4(rootNode.path( \"" + token.image + "\" ).getTextValue()"
 	 	);
   	}
+
+	("\")" | {extension = true;} "\",\"" <JAVANAME> )
+	{
+	  if(!extension){
+	    mWriter.write(
+	 	  	");\n"
+	 	);
+	 	return retValue;
+	  }else{
+	    mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	  }	  
+	}
+	
 	"\")"
 	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
 	  return retValue;
 	}
 }
@@ -634,16 +971,35 @@ int ifMapIp4() throws Exception:
 int ifMapIp6() throws Exception:   
 {
 	int retValue = 0;
+	boolean extension = false;
 }    
 {   	
 	<IP6>"(\""<JAVANAME>
   	{
 	 	mWriter.write(
-	 	  	"Identifiers.createIp6(rootNode.path( \"" + token.image + "\" ).getTextValue());\n"
+	 	  	"Identifiers.createIp6(rootNode.path( \"" + token.image + "\" ).getTextValue()"
 	 	);
   	}
+  	
+	("\")" | {extension = true;} "\",\"" <JAVANAME> )
+	{
+	  if(!extension){
+	    mWriter.write(
+	 	  	");\n"
+	 	);
+	 	return retValue;
+	  }else{
+	    mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	  }	  
+	}
+	
 	"\")"
 	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
 	  return retValue;
 	}
 }
@@ -651,16 +1007,35 @@ int ifMapIp6() throws Exception:
 int ifMapMac() throws Exception:   
 {
 	int retValue = 0;
+	boolean extension = false;
 }    
 {   	
 	<MAC>"(\""<JAVANAME>
   	{
 	 	mWriter.write(
-	 	  	"Identifiers.createMac(rootNode.path( \"" + token.image + "\" ).getTextValue());\n"
+	 	  	"Identifiers.createMac(rootNode.path( \"" + token.image + "\" ).getTextValue()"
 	 	);
   	}
+  	
+	("\")" | {extension = true;} "\",\"" <JAVANAME> )
+	{
+	  if(!extension){
+	    mWriter.write(
+	 	  	");\n"
+	 	);
+	 	return retValue;
+	  }else{
+	    mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	  }	  
+	}
+	
 	"\")"
 	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
 	  return retValue;
 	}
 }

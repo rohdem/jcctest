@@ -6,7 +6,7 @@ class: DhcpStrategy
 	publishLogData:
 
 		update:
-			identifier1 = mac("MAC")			
+			identifier1 = ar("MAC")			
 			identifier2 = dev("DHCPSERVERNAME")
 			meta = discoBy()
 			lifetime = session
@@ -24,7 +24,7 @@ class: DhcpStrategy
 	method: blub
 
 		delete:
-			identifier1 = mac("MAC")
+			identifier1 = identityOther("blib","blab","blub","Blob")
 			deleteString = "meta:ip-mac[@ifmap-publisher-id='" + ssrc.getPublisherId() + "']"
 
 
