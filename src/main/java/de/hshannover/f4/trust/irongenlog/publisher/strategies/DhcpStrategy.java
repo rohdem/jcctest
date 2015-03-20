@@ -60,7 +60,7 @@ public class DhcpStrategy extends PublishLogDataStrategy {
     public void blub(SSRC ssrc, JsonNode rootNode){
         {
         try {
-            Identifier ident1 = Identifiers.createOtherIdentity(rootNode.path( "blib" ).getTextValue(), rootNode.path( "blab" ).getTextValue(), rootNode.path( "blub" ).getTextValue(), rootNode.path( "Blob" ).getTextValue());
+            Identifier ident1 = Identifiers.createExtendedIdentity(rootNode.path( "MAC" ).getTextValue());
             String metaDeleteString = "meta:ip-mac[@ifmap-publisher-id='" + ssrc.getPublisherId() + "']";
             PublishDelete publishDelete = Requests.createPublishDelete(ident1, metaDeleteString);
             ssrc.publish(Requests.createPublishReq(publishDelete));

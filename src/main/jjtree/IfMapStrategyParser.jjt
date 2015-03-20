@@ -85,6 +85,7 @@ TOKEN:
   | < DEVRANDUUID: "devRandomUuid">
   | < IDENTITY: "identity">
   | < IDENTITYOTHER: "identityOther">
+  | < IDENTITYEX: "identityEx" >
   | < IP4: "ip4">
   | < IP6: "ip6">
   | < MAC: "mac">
@@ -125,7 +126,7 @@ TOKEN:
 TOKEN:
 {
     < JAVANAME: <IDENTIFIER> >
-    | < SEARCHSTRING: "\"" <IDENTIFIER> (<SEARCHSTRINGTOKEN>)* "\"" >
+    | < SEARCHSTRING: "'" <IDENTIFIER> (<SEARCHSTRINGTOKEN>)* "'" >
  	| < #SEARCHSTRINGTOKEN: (<IDENTIFIER> | ":" | "=" | "@" | "-" | "(" | ")" | "[" | "]" | " " | "'" | "+" | "." | "\"") >
  	| < JSONSTRINGNAME: ("\"" <IDENTIFIER> "\"") >
 }
@@ -493,7 +494,7 @@ int ifMapMetaDeleteString() throws Exception:
 	<METADELETESTRING> <SEARCHSTRING> 
 	{
 	    mWriter.write(
-			"            String metaDeleteString = " + token.image + ";\n"
+			"            String metaDeleteString = \"" + token.image.substring(1, token.image.length()-1) + "\";\n"
 		);
 		return retValue;
 	}
@@ -505,19 +506,22 @@ int ifMapIdentifiers() throws Exception:
 }    
 {   	
 	(
-	    retValue = ifMapAr()
-	  | retValue = ifMapArPubPref()
-	  | retValue = ifMapArRand()
-	  | retValue = ifMapArRandUuid()
-	  | retValue = ifMapDevice()
-	  | retValue = ifMapDevicePubPref()
-	  | retValue = ifMapDeviceRandom()
-	  | retValue = ifMapDeviceRandomUuid()
-	  | retValue = ifMapIdentity()
-	  | retValue = ifMapIdentityOther()
-	  | retValue = ifMapIp4()
-	  | retValue = ifMapIp6()
-	  | retValue = ifMapMac()
+	    LOOKAHEAD(3) retValue = ifMapAr()
+	  | LOOKAHEAD(3) retValue = ifMapArPubPref()
+	  | LOOKAHEAD(3) retValue = ifMapArRand()
+	  | LOOKAHEAD(3) retValue = ifMapArRandUuid()
+	  | LOOKAHEAD(3) retValue = ifMapDevice()
+	  | LOOKAHEAD(3) retValue = ifMapDevicePubPref()
+	  | LOOKAHEAD(3) retValue = ifMapDeviceRandom()
+	  | LOOKAHEAD(3) retValue = ifMapDeviceRandomUuid()
+	  | LOOKAHEAD(3) retValue = ifMapIdentity()
+	  | LOOKAHEAD(3) retValue = ifMapIdentityEx()
+	  | LOOKAHEAD(3) retValue = ifMapIdentityOther()
+	  | LOOKAHEAD(3) retValue = ifMapIdentifierWithJavaCommand()
+	  | LOOKAHEAD(3) retValue = ifMapIp4()
+	  | LOOKAHEAD(3) retValue = ifMapIp6()
+	  | LOOKAHEAD(3) retValue = ifMapMac() 
+	  
 	)
 	{
 	  return retValue;
@@ -881,6 +885,28 @@ int ifMapIdentity() throws Exception:
 	}
 }
 
+int ifMapIdentityEx() throws Exception:
+{
+	int retValue = 0;
+}    
+{   	
+	<IDENTITYEX>"(\""<JAVANAME>
+  	{
+	 	mWriter.write(
+	 	  	"Identifiers.createExtendedIdentity(rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+  	}
+
+	"\")"
+	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
+	  return retValue;
+	}
+}
+
+
 int ifMapIdentityOther() throws Exception:
 {
 	int retValue = 0;
@@ -1032,6 +1058,103 @@ int ifMapMac() throws Exception:
 	}
 	
 	"\")"
+	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
+	  return retValue;
+	}
+}
+
+int ifMapIdentifierWithJavaCommand() throws Exception:
+{
+	int retValue = 0;
+	int type = 0;
+}
+{   	
+
+  (
+     {type = 1;} <AR>"("<SEARCHSTRING>
+  |  {type = 2;} <ARPUBPREF>"("<SEARCHSTRING>
+  |  {type = 3;} <ARRAND>"("<SEARCHSTRING>
+  |  {type = 4;} <ARRANDUUID>"("<SEARCHSTRING>
+  |  {type = 5;} <DEV>"("<SEARCHSTRING>
+  |  {type = 6;} <DEVPUBPREF>"("<SEARCHSTRING>
+  |  {type = 7;} <IDENTITY>"("<SEARCHSTRING>
+  |  {type = 8;} <IDENTITYOTHER>"("<SEARCHSTRING>
+  |  {type = 9;} <IDENTITYEX>"("<SEARCHSTRING>
+  | {type = 10;} <IP4>"("<SEARCHSTRING>
+  | {type = 11;} <IP6>"("<SEARCHSTRING>
+  | {type = 12;} <MAC>"("<SEARCHSTRING>
+  )
+  	{    
+		switch (type) {
+            case 1:
+            	mWriter.write(
+	 	  			"Identifiers.createAr("+ token.image.substring(1, token.image.length()-1)
+	 			);
+            	break;
+            case 2:
+                mWriter.write(
+	 	  			"Identifiers.createArPubPrefixed("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+            case 3:
+                mWriter.write(
+	 	  			"Identifiers.createArRandom("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+            case 4:
+                mWriter.write(
+	 	  			"Identifiers.createArRandomUuid("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+            case 5:
+                mWriter.write(
+	 	  			"Identifiers.createDev("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+            case 6:
+                mWriter.write(
+	 	  			"Identifiers.createDevPubPrefixed("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+            case 7:
+                mWriter.write(
+	 	  			"Identifiers.createIdentity("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+            case 8:
+                mWriter.write(
+	 	  			"Identifiers.createOtherIdentity("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+            case 9:
+                mWriter.write(
+	 	  			"Identifiers.createExtendedIdentity("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+            case 10:
+                mWriter.write(
+	 	  			"Identifiers.createIp4("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+            case 11:
+                mWriter.write(
+	 	  			"Identifiers.createIp6("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+            case 12:
+                mWriter.write(
+	 	  			"Identifiers.createMac("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+            default: return -1;
+                     break;
+		}
+	}
+            
+	")"
 	{
 	  mWriter.write(
 	 	  	");\n"
