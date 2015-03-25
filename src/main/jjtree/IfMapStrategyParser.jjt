@@ -111,17 +111,49 @@ TOKEN:
 {
     < METALIFETIMESESSION: "session" >
   | < METALIFETIMEFOREVER: "forever" >
+  | < META_CREATE: "create" >
   | < META_ARDEV: "arDev" >
   | < META_ARIP: "arIp" >
   | < META_ARMAC: "arMac" >
   | < META_AUTHAS: "authAs" >
   | < META_AUTHBY: "authBy" >
+  | < META_CAPABILITY: "capability" >
+  | < META_CLIENTTIME: "clientTime" >
   | < META_DEVIP: "devIp" >
+  | < META_DEVATTR: "devAttr" >
+  | < META_DEVCHAR: "devChar" >
   | < META_DISCOBY: "discoBy" >
+  | < META_ENFORCEMENT: "enforcementReport" >
+  | < META_EVENT: "event" >
   | < META_IPMAC: "ipMac" >
+  | < META_LAYER2: "layer2Information" >
+  | < META_INVESTIGATION: "requestForInvestigation" >
+  | < META_ROLE: "role" >
+  | < META_UNEXPECTEDBEHAVIOR: "unexpectedBehavior" >  
+
 }
 
+/* IFMAP METADATA TYPES */
 
+TOKEN:
+{
+    < METACARDINALITYSINGLE: "singleValue" >
+  | < METACARDINALITYMULTI: "multiValue" >
+  | < METAENFORCEMENTACTIONBLOCK: "block" >
+  | < METAENFORCEMENTACTIONOTHER: "other" >
+  | < METAENFORCEMENTACTIONQUARANTINE: "quarantine" >
+  | < METASIGNIFICANCECRITICAL: "critical" >
+  | < METASIGNIFICANCEIMPORTANT: "important" >
+  | < METASIGNIFICANCEINFORMATIONAL: "informational" >
+  | < METAEVENTTYPEBEHAVIOR: "behavioralChange" >
+  | < METAEVENTTYPEBOTNET: "botnetInfection" >
+  | < METAEVENTTYPECVE: "cve" >
+  | < METAEVENTTYPEFLOWS: "excessiveFlows" >
+  | < METAEVENTTYPEOTHER: "otherEvent" >
+  | < METAEVENTTYPEP2P: "p2p" >
+  | < METAEVENTTYPEPOLICY: "policyViolation" >
+  | < METAEVENTTYPEWORM: "wormInfection" >
+}
 /* IDENTIFIERS */
 TOKEN:
 {
@@ -505,7 +537,7 @@ int ifMapIdentifiers() throws Exception:
 	int retValue = 0;
 }    
 {   	
-	(
+	  (
 	    LOOKAHEAD(3) retValue = ifMapAr()
 	  | LOOKAHEAD(3) retValue = ifMapArPubPref()
 	  | LOOKAHEAD(3) retValue = ifMapArRand()
@@ -517,10 +549,10 @@ int ifMapIdentifiers() throws Exception:
 	  | LOOKAHEAD(3) retValue = ifMapIdentity()
 	  | LOOKAHEAD(3) retValue = ifMapIdentityEx()
 	  | LOOKAHEAD(3) retValue = ifMapIdentityOther()
-	  | LOOKAHEAD(3) retValue = ifMapIdentifierWithJavaCommand()
 	  | LOOKAHEAD(3) retValue = ifMapIp4()
 	  | LOOKAHEAD(3) retValue = ifMapIp6()
-	  | LOOKAHEAD(3) retValue = ifMapMac() 
+	  | LOOKAHEAD(3) retValue = ifMapMac()
+	  | LOOKAHEAD(3) retValue = ifMapIdentifierWithJavaCommand()
 	  
 	)
 	{
@@ -534,14 +566,27 @@ int ifMapMetas() throws Exception:
 }    
 {   	
 	(
-	    retValue = ifMapArDev()
-	  | retValue = ifMapArIp()
-	  | retValue = ifMapArMac()
-	  | retValue = ifMapAuthAs()
-	  | retValue = ifMapAuthBy()
-	  | retValue = ifMapDevIp()
-	  | retValue = ifMapDiscoBy()
-	  | retValue = ifMapIpMac()
+	    LOOKAHEAD(3) retValue = ifMapCreate()
+	  | LOOKAHEAD(3) retValue = ifMapArDev()
+	  | LOOKAHEAD(3) retValue = ifMapArIp()
+	  | LOOKAHEAD(3) retValue = ifMapArMac()
+	  | LOOKAHEAD(3) retValue = ifMapAuthAs()
+	  | LOOKAHEAD(3) retValue = ifMapAuthBy()
+	  | LOOKAHEAD(3) retValue = ifMapCapability()
+	  | LOOKAHEAD(3) retValue = ifMapClientTime()
+	  | LOOKAHEAD(3) retValue = ifMapDevIp()
+	  | LOOKAHEAD(3) retValue = ifMapDevAttr()
+	  | LOOKAHEAD(3) retValue = ifMapDevChar()
+	  | LOOKAHEAD(3) retValue = ifMapDiscoBy()
+	  | LOOKAHEAD(3) retValue = ifMapEnforcementReport()
+	  | LOOKAHEAD(3) retValue = ifMapEvent()
+	  | LOOKAHEAD(3) retValue = ifMapIpMac()
+	  | LOOKAHEAD(3) retValue = ifMapLayer2Information()
+	  | LOOKAHEAD(3) retValue = ifMapRequestForInvestigation()
+	  | LOOKAHEAD(3) retValue = ifMapRole()
+	  | LOOKAHEAD(3) retValue = ifMapUnexpectedBehavior()
+	  | LOOKAHEAD(3) retValue = ifMapMetaWithJavaCommand()
+	  
 	)
 	{
 	  return retValue;
@@ -1165,6 +1210,20 @@ int ifMapIdentifierWithJavaCommand() throws Exception:
 
 // METADATA =======================================================================================================
 
+int ifMapCreate() throws Exception:
+{
+	int retValue = 0;
+}    
+{  	
+	<META_CREATE>"()"
+  	{
+	 	mWriter.write(
+	 	  	"\n"
+	 	);
+	 	return retValue;
+  	}
+} 
+
 int ifMapArDev() throws Exception:   
 {
 	int retValue = 0;
@@ -1235,6 +1294,34 @@ int ifMapAuthBy() throws Exception:
   	}
 }
 
+int ifMapCapability() throws Exception:
+{
+	int retValue = 0;
+}    
+{  	
+	<META_CREATE>"()"
+  	{
+	 	mWriter.write(
+	 	  	"\n"
+	 	);
+	 	return retValue;
+  	}
+}
+
+int ifMapClientTime() throws Exception:
+{
+	int retValue = 0;
+}    
+{  	
+	<META_CREATE>"()"
+  	{
+	 	mWriter.write(
+	 	  	"\n"
+	 	);
+	 	return retValue;
+  	}
+}
+
 int ifMapDevIp() throws Exception:   
 {
 	int retValue = 0;
@@ -1249,7 +1336,63 @@ int ifMapDevIp() throws Exception:
   	}
 }
 
+int ifMapDevAttr() throws Exception:
+{
+	int retValue = 0;
+}    
+{  	
+	<META_CREATE>"()"
+  	{
+	 	mWriter.write(
+	 	  	"\n"
+	 	);
+	 	return retValue;
+  	}
+}
+
+int ifMapDevChar() throws Exception:
+{
+	int retValue = 0;
+}    
+{  	
+	<META_CREATE>"()"
+  	{
+	 	mWriter.write(
+	 	  	"\n"
+	 	);
+	 	return retValue;
+  	}
+}
+
 int ifMapDiscoBy() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<META_DISCOBY>"()"
+  	{
+	 	mWriter.write(
+	 	  	"getMetadataFactory().createDiscoveredBy();\n"
+	 	);
+	 	return retValue;
+  	}
+}
+
+int ifMapEnforcementReport() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<META_DISCOBY>"()"
+  	{
+	 	mWriter.write(
+	 	  	"getMetadataFactory().createDiscoveredBy();\n"
+	 	);
+	 	return retValue;
+  	}
+}
+
+int ifMapEvent() throws Exception:   
 {
 	int retValue = 0;
 }    
@@ -1278,8 +1421,162 @@ int ifMapIpMac() throws Exception:
 }
 
 
+int ifMapLayer2Information() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<META_DISCOBY>"()"
+  	{
+	 	mWriter.write(
+	 	  	"getMetadataFactory().createDiscoveredBy();\n"
+	 	);
+	 	return retValue;
+  	}
+}
+
+int ifMapRequestForInvestigation() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<META_DISCOBY>"()"
+  	{
+	 	mWriter.write(
+	 	  	"getMetadataFactory().createDiscoveredBy();\n"
+	 	);
+	 	return retValue;
+  	}
+}
 
 
+int ifMapRole() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<META_DISCOBY>"()"
+  	{
+	 	mWriter.write(
+	 	  	"getMetadataFactory().createDiscoveredBy();\n"
+	 	);
+	 	return retValue;
+  	}
+}
+
+
+int ifMapUnexpectedBehavior() throws Exception:   
+{
+	int retValue = 0;
+}    
+{   	
+	<META_DISCOBY>"()"
+  	{
+	 	mWriter.write(
+	 	  	"getMetadataFactory().createDiscoveredBy();\n"
+	 	);
+	 	return retValue;
+  	}
+}
+
+
+int ifMapMetaWithJavaCommand() throws Exception:
+{
+	int retValue = 0;
+	int type = 0;
+}
+{   	
+
+  (   
+     {type = 1;} <META_CREATE>"("<SEARCHSTRING>
+  |  {type = 2;} <META_CAPABILITY>"("<SEARCHSTRING>
+  |  {type = 3;} <META_CLIENTTIME>"("<SEARCHSTRING>
+  |  {type = 4;} <META_DEVATTR>"("<SEARCHSTRING>
+  |  {type = 5;} <META_DEVCHAR>"("<SEARCHSTRING>
+  |  {type = 6;} <META_ENFORCEMENT>"("<SEARCHSTRING>
+  |  {type = 7;} <META_EVENT>"("<SEARCHSTRING>
+  |  {type = 8;} <META_IPMAC>"("<SEARCHSTRING>
+  |  {type = 9;} <META_LAYER2>"("<SEARCHSTRING>
+  | {type = 10;} <META_INVESTIGATION>"("<SEARCHSTRING>
+  | {type = 11;} <META_ROLE>"("<SEARCHSTRING>
+  | {type = 12;} <META_UNEXPECTEDBEHAVIOR>"("<SEARCHSTRING>
+  )
+  	{
+    
+		switch (type) {
+            case 1:
+            	mWriter.write(
+	 	  			"getMetadataFactory().create("+ token.image.substring(1, token.image.length()-1)
+	 			);
+            	break;
+            case 2:
+                mWriter.write(
+	 	  			"getMetadataFactory().createCapability("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+            case 3:
+                mWriter.write(
+	 	  			"getMetadataFactory().createClientTime("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+            case 4:
+                mWriter.write(
+	 	  			"getMetadataFactory().createDevAttr("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+            case 5:
+                mWriter.write(
+	 	  			"getMetadataFactory().createDevChar("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+            case 6:
+                mWriter.write(
+	 	  			"getMetadataFactory().createEnforcementReport("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+            case 7:
+                mWriter.write(
+	 	  			"getMetadataFactory().createEvent("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+            case 8:
+                mWriter.write(
+	 	  			"getMetadataFactory().createIpMac("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+            case 9:
+                mWriter.write(
+	 	  			"getMetadataFactory().createLayer2Information("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+            case 10:
+                mWriter.write(
+	 	  			"getMetadataFactory().createRequestForInvestigation("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+            case 11:
+                mWriter.write(
+	 	  			"getMetadataFactory().createRole("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+            case 12:
+                mWriter.write(
+	 	  			"getMetadataFactory().createUnexpectedBehavior("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+            default: return -1;
+                     break;
+		}
+	}
+            
+	")"
+	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
+	  return retValue;
+	}
+}
 
 
 
