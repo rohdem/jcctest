@@ -127,9 +127,11 @@ TOKEN:
   | < META_EVENT: "event" >
   | < META_IPMAC: "ipMac" >
   | < META_LAYER2: "layer2Information" >
+  | < META_LOCATION: "location" >
   | < META_INVESTIGATION: "requestForInvestigation" >
   | < META_ROLE: "role" >
-  | < META_UNEXPECTEDBEHAVIOR: "unexpectedBehavior" >  
+  | < META_UNEXPECTEDBEHAVIOR: "unexpectedBehavior" >
+  | < META_WLANINFORMATION: "wlanInformation" >  
 
 }
 
@@ -1867,9 +1869,11 @@ int ifMapMetaWithJavaCommand() throws Exception:
   |  {type = 7;} <META_EVENT>"("<SEARCHSTRING>
   |  {type = 8;} <META_IPMAC>"("<SEARCHSTRING>
   |  {type = 9;} <META_LAYER2>"("<SEARCHSTRING>
-  | {type = 10;} <META_INVESTIGATION>"("<SEARCHSTRING>
-  | {type = 11;} <META_ROLE>"("<SEARCHSTRING>
-  | {type = 12;} <META_UNEXPECTEDBEHAVIOR>"("<SEARCHSTRING>
+  | {type = 10;} <META_LOCATION>"("<SEARCHSTRING>
+  | {type = 11;} <META_INVESTIGATION>"("<SEARCHSTRING>
+  | {type = 12;} <META_ROLE>"("<SEARCHSTRING>
+  | {type = 13;} <META_UNEXPECTEDBEHAVIOR>"("<SEARCHSTRING>
+  | {type = 14;} <META_WLANINFORMATION>"("<SEARCHSTRING>
   )
   	{
     
@@ -1919,19 +1923,29 @@ int ifMapMetaWithJavaCommand() throws Exception:
 	 	  			"getMetadataFactory().createLayer2Information("+ token.image.substring(1, token.image.length()-1)
 	 			);
 				break;
-            case 10:
+		    case 10:
                 mWriter.write(
-	 	  			"getMetadataFactory().createRequestForInvestigation("+ token.image.substring(1, token.image.length()-1)
+	 	  			"getMetadataFactory().createLocation("+ token.image.substring(1, token.image.length()-1)
 	 			);
 				break;
             case 11:
                 mWriter.write(
-	 	  			"getMetadataFactory().createRole("+ token.image.substring(1, token.image.length()-1)
+	 	  			"getMetadataFactory().createRequestForInvestigation("+ token.image.substring(1, token.image.length()-1)
 	 			);
 				break;
             case 12:
                 mWriter.write(
+	 	  			"getMetadataFactory().createRole("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+            case 13:
+                mWriter.write(
 	 	  			"getMetadataFactory().createUnexpectedBehavior("+ token.image.substring(1, token.image.length()-1)
+	 			);
+				break;
+			case 14:
+                mWriter.write(
+	 	  			"getMetadataFactory().createWlanInformation("+ token.image.substring(1, token.image.length()-1)
 	 			);
 				break;
             default: return -1;
