@@ -8,7 +8,7 @@ class: DhcpStrategy
 		update:
 			identifier1 = ar("MAC")			
 			identifier2 = dev("DHCPSERVERNAME")
-			meta = discoBy()
+			meta = unexpectedBehavior("a","b","c","d",critical,"f")
 			lifetime = session
 		
 		delete:

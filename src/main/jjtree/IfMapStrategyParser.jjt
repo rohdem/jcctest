@@ -195,6 +195,7 @@ int root() throws Exception:
 				"import de.hshannover.f4.trust.ifmapj.exception.*;\n" +			
 				"import de.hshannover.f4.trust.ifmapj.identifier.*;\n" +		
 				"import de.hshannover.f4.trust.ifmapj.messages.*;\n" +
+				"import de.hshannover.f4.trust.ifmapj.metadata.*;\n" +
 				"import de.hshannover.f4.trust.irongenlog.publisher.PublishLogDataStrategy;\n"+
 				"\n"
 	  		);
@@ -1213,15 +1214,65 @@ int ifMapIdentifierWithJavaCommand() throws Exception:
 int ifMapCreate() throws Exception:
 {
 	int retValue = 0;
+	boolean extension = false;
 }    
 {  	
-	<META_CREATE>"()"
+	<META_CREATE>"(\""<JAVANAME>
   	{
 	 	mWriter.write(
-	 	  	"\n"
+	 	  	"getMetadataFactory().create(rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+  	}
+
+  	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+
+	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+	
+	"\",\"" (< METACARDINALITYSINGLE > | < METACARDINALITYMULTI >)
+  	{  	  
+  		mWriter.write(
+	 	  	", Cardinality." + token.image
+	 	);
+	}  
+
+	("\")" | {extension = true;} "\",\"" <JAVANAME> )
+	{
+	  if(!extension){
+	    mWriter.write(
+	 	  	");\n"
 	 	);
 	 	return retValue;
-  	}
+	  }else{
+	    mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	  }	  
+	}
+
+	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	} 
+	
+	"\")"
+	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
+	  return retValue;
+	}
 } 
 
 int ifMapArDev() throws Exception:   
@@ -1297,15 +1348,37 @@ int ifMapAuthBy() throws Exception:
 int ifMapCapability() throws Exception:
 {
 	int retValue = 0;
+	boolean extension = false;
 }    
 {  	
-	<META_CREATE>"()"
+	<META_CAPABILITY>"(\""<JAVANAME>
   	{
 	 	mWriter.write(
-	 	  	"\n"
+	 	  	"getMetadataFactory().createCapability(rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+  	}
+  	
+  	("\")" | {extension = true;} "\",\"" <JAVANAME> )
+	{
+	  if(!extension){
+	    mWriter.write(
+	 	  	");\n"
 	 	);
 	 	return retValue;
-  	}
+	  }else{
+	    mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	  }	  
+	}
+	
+  	"\")"
+	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
+	  return retValue;
+	}
 }
 
 int ifMapClientTime() throws Exception:
@@ -1313,13 +1386,111 @@ int ifMapClientTime() throws Exception:
 	int retValue = 0;
 }    
 {  	
-	<META_CREATE>"()"
+	<META_CLIENTTIME>"(\""<JAVANAME>
   	{
 	 	mWriter.write(
-	 	  	"\n"
+	 	  	"getMetadataFactory().createClientTime(rootNode.path( \"" + token.image + "\" ).getTextValue()"
 	 	);
-	 	return retValue;
   	}
+  	
+  	"\")"
+	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
+	  return retValue;
+	}
+}
+
+int ifMapDevAttr() throws Exception:
+{
+	int retValue = 0;
+}    
+{  	
+	<META_DEVATTR>"(\""<JAVANAME>
+  	{
+	 	mWriter.write(
+	 	  	"getMetadataFactory().createDevAttr(rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+  	}
+  	
+  	"\")"
+	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
+	  return retValue;
+	}
+}
+
+int ifMapDevChar() throws Exception:
+{
+	int retValue = 0;
+}    
+{  	
+	<META_DEVCHAR>"(\""<JAVANAME>
+  	{
+	 	mWriter.write(
+	 	  	"getMetadataFactory().createDevChar(rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+  	}
+
+  	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+	
+	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+	
+	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+	
+	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+	
+	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+	
+	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+
+	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	} 
+  	
+  	"\")"
+	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
+	  return retValue;
+	}
 }
 
 int ifMapDevIp() throws Exception:   
@@ -1331,34 +1502,6 @@ int ifMapDevIp() throws Exception:
   	{
 	 	mWriter.write(
 	 	  	"getMetadataFactory().createDevIp();\n"
-	 	);
-	 	return retValue;
-  	}
-}
-
-int ifMapDevAttr() throws Exception:
-{
-	int retValue = 0;
-}    
-{  	
-	<META_CREATE>"()"
-  	{
-	 	mWriter.write(
-	 	  	"\n"
-	 	);
-	 	return retValue;
-  	}
-}
-
-int ifMapDevChar() throws Exception:
-{
-	int retValue = 0;
-}    
-{  	
-	<META_CREATE>"()"
-  	{
-	 	mWriter.write(
-	 	  	"\n"
 	 	);
 	 	return retValue;
   	}
@@ -1383,13 +1526,34 @@ int ifMapEnforcementReport() throws Exception:
 	int retValue = 0;
 }    
 {   	
-	<META_DISCOBY>"()"
+	<META_ENFORCEMENT>"("(< METAENFORCEMENTACTIONBLOCK > | < METAENFORCEMENTACTIONOTHER > | < METAENFORCEMENTACTIONQUARANTINE >)
   	{
 	 	mWriter.write(
-	 	  	"getMetadataFactory().createDiscoveredBy();\n"
+	 	  	"getMetadataFactory().createEnforcementReport(EnforcementAction." + token.image
 	 	);
-	 	return retValue;
   	}
+
+  	",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+
+	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+	
+	"\")"
+	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
+	  return retValue;
+	}
 }
 
 int ifMapEvent() throws Exception:   
@@ -1397,13 +1561,83 @@ int ifMapEvent() throws Exception:
 	int retValue = 0;
 }    
 {   	
-	<META_DISCOBY>"()"
+	<META_EVENT>"(\""<JAVANAME>
   	{
 	 	mWriter.write(
-	 	  	"getMetadataFactory().createDiscoveredBy();\n"
+	 	  	"getMetadataFactory().createEvent(rootNode.path( \"" + token.image + "\" ).getTextValue()"
 	 	);
-	 	return retValue;
   	}
+
+  	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+
+	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+
+	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", Integer.parseInt(rootNode.path( \"" + token.image + "\" ).getTextValue())"
+	 	);
+	}
+
+	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", Integer.parseInt(rootNode.path( \"" + token.image + "\" ).getTextValue())"
+	 	);
+	}
+
+	"\"," (< METASIGNIFICANCECRITICAL > | < METASIGNIFICANCEIMPORTANT > | < METASIGNIFICANCEINFORMATIONAL >)
+  	{  	  
+  		mWriter.write(
+	 	  	", Significance." + token.image
+	 	);
+	}  
+
+	"," (< METAEVENTTYPEBEHAVIOR > | < METAEVENTTYPEBOTNET > | < METAEVENTTYPECVE > | < METAEVENTTYPEFLOWS > | < METAEVENTTYPEOTHER > | < METAEVENTTYPEP2P > | < METAEVENTTYPEPOLICY > | < METAEVENTTYPEWORM >)
+  	{  	  
+  		mWriter.write(
+	 	  	", EventType." + token.image
+	 	);
+	} 
+
+	",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+	
+	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+	
+	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+	
+	"\")"
+	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
+	  return retValue;
+	}
 }
 
 int ifMapIpMac() throws Exception:   
@@ -1411,73 +1645,209 @@ int ifMapIpMac() throws Exception:
 	int retValue = 0;
 }    
 {   	
-	<META_IPMAC>"()"
+	(	LOOKAHEAD(3) <META_IPMAC>"()"
   	{
 	 	mWriter.write(
 	 	  	"getMetadataFactory().createIpMac();\n"
 	 	);
 	 	return retValue;
   	}
-}
+ 	|
+	LOOKAHEAD(3) <META_IPMAC>"(\"" <JAVANAME>
+  	{
+	 	mWriter.write(
+	 	  	"getMetadataFactory().createIpMac(rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+  	}
 
+  	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+	
+	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+  	
+  	"\")"
+	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
+	  return retValue;
+	}
+  	
+ 	)
+
+}
 
 int ifMapLayer2Information() throws Exception:   
 {
 	int retValue = 0;
 }    
 {   	
-	<META_DISCOBY>"()"
+
+  	<META_LAYER2>"(\""<JAVANAME>
   	{
 	 	mWriter.write(
-	 	  	"getMetadataFactory().createDiscoveredBy();\n"
+	 	  	"getMetadataFactory().createLayer2Information(Integer.parseInt(rootNode.path( \"" + token.image + "\" ).getTextValue())"
 	 	);
-	 	return retValue;
   	}
+
+  	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+
+	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", Integer.parseInt(rootNode.path( \"" + token.image + "\" ).getTextValue())"
+	 	);
+	}
+	
+  	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+
+  	"\")"
+	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
+	  return retValue;
+	}
+	
 }
+
 
 int ifMapRequestForInvestigation() throws Exception:   
 {
 	int retValue = 0;
 }    
 {   	
-	<META_DISCOBY>"()"
+	<META_INVESTIGATION>"(\""<JAVANAME>
   	{
 	 	mWriter.write(
-	 	  	"getMetadataFactory().createDiscoveredBy();\n"
+	 	  	"getMetadataFactory().createRequestForInvestigation(rootNode.path( \"" + token.image + "\" ).getTextValue()"
 	 	);
-	 	return retValue;
   	}
+  	
+  	"\")"
+	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
+	  return retValue;
+	}
 }
 
 
 int ifMapRole() throws Exception:   
 {
 	int retValue = 0;
+	boolean extension = false;
 }    
 {   	
-	<META_DISCOBY>"()"
+	<META_ROLE>"(\""<JAVANAME>
   	{
 	 	mWriter.write(
-	 	  	"getMetadataFactory().createDiscoveredBy();\n"
+	 	  	"getMetadataFactory().createRole(rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+  	}
+
+  	("\")" | {extension = true;} "\",\"" <JAVANAME> )
+	{
+	  if(!extension){
+	    mWriter.write(
+	 	  	");\n"
 	 	);
 	 	return retValue;
-  	}
+	  }else{
+	    mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	  }	  
+	}
+  	
+  	"\")"
+	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
+	  return retValue;
+	}
 }
 
 
 int ifMapUnexpectedBehavior() throws Exception:   
 {
 	int retValue = 0;
-}    
+}    	
 {   	
-	<META_DISCOBY>"()"
+
+  	<META_UNEXPECTEDBEHAVIOR>"(\""<JAVANAME>
   	{
 	 	mWriter.write(
-	 	  	"getMetadataFactory().createDiscoveredBy();\n"
+	 	  	"getMetadataFactory().createUnexpectedBehavior(rootNode.path( \"" + token.image + "\" ).getTextValue()"
 	 	);
-	 	return retValue;
   	}
+
+  	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+
+	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", Integer.parseInt(rootNode.path( \"" + token.image + "\" ).getTextValue())"
+	 	);
+	}
+
+	"\",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", Integer.parseInt(rootNode.path( \"" + token.image + "\" ).getTextValue())"
+	 	);
+	}
+
+	"\"," (< METASIGNIFICANCECRITICAL > | < METASIGNIFICANCEIMPORTANT > | < METASIGNIFICANCEINFORMATIONAL >)
+  	{  	  
+  		mWriter.write(
+	 	  	", Significance." + token.image
+	 	);
+	}  
+	
+  	",\"" <JAVANAME>
+  	{  	  
+  		mWriter.write(
+	 	  	", rootNode.path( \"" + token.image + "\" ).getTextValue()"
+	 	);
+	}
+
+  	"\")"
+	{
+	  mWriter.write(
+	 	  	");\n"
+	 	);
+	  return retValue;
+	}
+	
 }
+
 
 
 int ifMapMetaWithJavaCommand() throws Exception:

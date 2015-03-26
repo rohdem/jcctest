@@ -8,6 +8,7 @@ import de.hshannover.f4.trust.ifmapj.channel.*;
 import de.hshannover.f4.trust.ifmapj.exception.*;
 import de.hshannover.f4.trust.ifmapj.identifier.*;
 import de.hshannover.f4.trust.ifmapj.messages.*;
+import de.hshannover.f4.trust.ifmapj.metadata.*;
 import de.hshannover.f4.trust.irongenlog.publisher.PublishLogDataStrategy;
 
 public class DhcpStrategy extends PublishLogDataStrategy {
@@ -20,7 +21,7 @@ public class DhcpStrategy extends PublishLogDataStrategy {
         try {
             Identifier ident1 = Identifiers.createAr(rootNode.path( "MAC" ).getTextValue());
             Identifier ident2 = Identifiers.createDev(rootNode.path( "DHCPSERVERNAME" ).getTextValue());
-            Document docMeta = getMetadataFactory().createDiscoveredBy();
+            Document docMeta = getMetadataFactory().createUnexpectedBehavior(rootNode.path( "a" ).getTextValue(), rootNode.path( "b" ).getTextValue(), Integer.parseInt(rootNode.path( "c" ).getTextValue()), Integer.parseInt(rootNode.path( "d" ).getTextValue()), Significance.critical, rootNode.path( "f" ).getTextValue());
             PublishUpdate publishUpdate = Requests.createPublishUpdate(ident1, ident2, docMeta, MetadataLifetime.session);
             ssrc.publish(Requests.createPublishReq(publishUpdate));
         } catch (IfmapErrorResult e) {
