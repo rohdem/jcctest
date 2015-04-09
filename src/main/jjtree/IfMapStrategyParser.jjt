@@ -55,7 +55,10 @@ TOKEN:
     < PACKAGE: "package:" >
   | < CLASS: "class:" >
   | < METHOD: "method:" >
-
+  | < CALL: "call:" >
+  | < IF: "if:">
+  | < ELSEIF: "elseif:">
+  | < ELSE: "else:">
 }
 
 /* IFMAP WORDS */
@@ -161,8 +164,8 @@ TOKEN:
 {
     < JAVANAME: <IDENTIFIER> >
     | < SEARCHSTRING: "'" <IDENTIFIER> (<SEARCHSTRINGTOKEN>)* "'" >
- 	| < #SEARCHSTRINGTOKEN: (<IDENTIFIER> | ":" | "=" | "@" | "-" | "(" | ")" | "[" | "]" | " " | "'" | "+" | "." | "\"") >
- 	| < JSONSTRINGNAME: ("\"" <IDENTIFIER> "\"") >
+ 	| < #SEARCHSTRINGTOKEN: (<IDENTIFIER> | ":" | "=" | "@" | "-" | "(" | ")" | "[" | "]" | " " | "'" | "+" | "." | "," | "\"") >
+ 	| < JSONSTRINGNAME: ("\"" <IDENTIFIER> ( <IDENTIFIER> | "-")* "\"") >
 }
 
 TOKEN:
@@ -192,7 +195,6 @@ int root() throws Exception:
 				"import java.util.logging.Logger;\n"		+	
 				"import org.codehaus.jackson.JsonNode;\n" +
 				"import org.w3c.dom.Document;\n" +
-				"import de.hshannover.f4.trust.ifmapj.binding.*;\n" +
 				"import de.hshannover.f4.trust.ifmapj.channel.*;\n" +
 				"import de.hshannover.f4.trust.ifmapj.exception.*;\n" +			
 				"import de.hshannover.f4.trust.ifmapj.identifier.*;\n" +		
@@ -216,7 +218,7 @@ int root() throws Exception:
 
 int classDef() throws Exception:   
 {
-  int retValue;
+  int retValue = 0;
 }    
 { 
   	
@@ -255,10 +257,10 @@ int publishLogData() throws Exception:
 	 	);
   	}
   	( < EOL > )+  	
-
 	
-	statementDef()
-	{  		mWriter.write(
+	retValue = statementDef()
+	{
+  		mWriter.write(
 			"    }\n"+
 			"\n"
 		);
@@ -282,7 +284,7 @@ int methodDef() throws Exception:
 
   	( < EOL > )+
 
-	statementDef()
+	retValue = statementDef()
 	{
   		mWriter.write(
 		  "    }\n"+
@@ -298,15 +300,13 @@ int statementDef() throws Exception:
 {
   int retValue = 0;
 }    
-{ 
+{
   	
-	((retValue = publishUpdate() | retValue = publishDelete() | retValue = publishNotify() ) ( < EOL > )+ )+
+	((retValue = publishUpdate() | retValue = publishDelete() | retValue = publishNotify() | retValue = callMethode() | retValue = ifStatement() ) ( < EOL > )+ )+
 	{
 		return retValue;
 	}
 }
-
-
 
 int publishUpdate() throws Exception:   
 {
@@ -372,9 +372,9 @@ int publishDelete() throws Exception:
   	
 	retValue = ifMapIdentifier1()
 	
-	[LOOKAHEAD(10) {optionalIdentifier = true;} ( < EOL > )+ retValue = ifMapIdentifier2() ]
+	[LOOKAHEAD(5) {optionalIdentifier = true;} ( < EOL > )+ retValue = ifMapIdentifier2() ]
 
-	[LOOKAHEAD(10) {optionalDeleteString = true;} ( < EOL > )+ retValue = ifMapMetaDeleteString() ]
+	[LOOKAHEAD(5) {optionalDeleteString = true;} ( < EOL > )+ retValue = ifMapMetaDeleteString() ]
 	{
 	    if(optionalIdentifier && optionalDeleteString){
 			mWriter.write(
@@ -453,6 +453,136 @@ int publishNotify() throws Exception:
 	    return retValue;
 	}
 
+}
+
+int callMethode() throws Exception:   
+{
+  int retValue = 0;
+}    
+{
+	<CALL> <JAVANAME>
+	{
+	    mWriter.write(
+	        "        "+ token.image + "(ssrc, rootNode);\n"      
+		);	  
+		return retValue; 
+	}
+}
+
+int ifStatement() throws Exception:   
+{
+  int retValue = 0;
+}    
+{
+	<IF> <JSONSTRINGNAME>
+	{
+		String firstString = token.image.substring(1, token.image.length()-1);
+	}
+
+	(	  " == "<JSONSTRINGNAME>
+	{
+	  	mWriter.write(
+	  	    "        if(rootNode.path( \"" + firstString + "\" ).getTextValue()" +
+	        ".equals(\"" + token.image.substring(1, token.image.length()-1) + "\")){\n"     
+		);
+	}
+
+	| " != "<JSONSTRINGNAME>
+	{
+	  	mWriter.write(
+	  	    "        if(!rootNode.path( \"" + firstString + "\" ).getTextValue()" +
+	        ".equals(\"" + token.image.substring(1, token.image.length()-1) + "\")){\n"     
+		);
+	}
+	)
+
+	"("( < EOL > )+
+
+    retValue = statementDef()
+
+    ")"
+	{
+	  	mWriter.write(
+	       "        }\n"     
+		);
+	}
+
+	(retValue = elseIfStatement())*
+
+	[retValue = elseStatement()]
+	
+	{
+		return retValue; 
+	}
+
+	
+}
+
+int elseIfStatement() throws Exception:   
+{
+  int retValue = 0;
+}    
+{
+	<ELSEIF> <JSONSTRINGNAME>
+	{
+		String firstString = token.image.substring(1, token.image.length()-1);
+	}
+		
+	(
+	  " == "<JSONSTRINGNAME>
+	{
+	  	mWriter.write(
+	  	    "        else if(rootNode.path( \"" + firstString + "\" ).getTextValue()" +
+	        ".equals(\"" + token.image.substring(1, token.image.length()-1) + "\")){\n"     
+		);
+	}
+
+	| " != "<JSONSTRINGNAME>
+	{
+	  	mWriter.write(
+	  	    "        else if(!rootNode.path( \"" + firstString + "\" ).getTextValue()" +
+	        ".equals(\"" + token.image.substring(1, token.image.length()-1) + "\")){\n"     
+		);
+	}
+	)
+
+	"("( < EOL > )+
+
+    retValue = statementDef()
+
+    ")"
+	{
+	  	mWriter.write(
+	       "        }\n"     
+		);
+		return retValue; 
+	}
+  
+}
+
+int elseStatement() throws Exception:   
+{
+  int retValue = 0;
+}    
+{
+  	<ELSE>
+	{
+	  	mWriter.write(
+	  	    "        else{\n"     
+		);
+	}
+
+	"("( < EOL > )+
+
+    retValue = statementDef()
+
+    ")"
+	{
+	  	mWriter.write(
+	       "        }\n"     
+		);
+		return retValue; 
+	}
 }
 
 int ifMapIdentifier1() throws Exception:   
