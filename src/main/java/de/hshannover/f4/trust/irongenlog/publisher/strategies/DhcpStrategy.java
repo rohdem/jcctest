@@ -1,8 +1,12 @@
 package de.hshannover.f4.trust.irongenlog.publisher.strategies;
 
 import java.util.logging.Logger;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 import org.codehaus.jackson.JsonNode;
 import org.w3c.dom.Document;
+import de.hshannover.f4.trust.ifmapj.binding.*;
 import de.hshannover.f4.trust.ifmapj.channel.*;
 import de.hshannover.f4.trust.ifmapj.exception.*;
 import de.hshannover.f4.trust.ifmapj.identifier.*;
@@ -65,6 +69,7 @@ public class DhcpStrategy extends PublishLogDataStrategy {
             Identifier ident2 = Identifiers.createIp4(rootNode.path( "IP" ).getTextValue());
             String metaDeleteString = "meta:ip-mac[@ifmap-publisher-id='" + ssrc.getPublisherId() + "']";
             PublishDelete publishDelete = Requests.createPublishDelete(ident1, ident2, metaDeleteString);
+			publishDelete.addNamespaceDeclaration(IfmapStrings.STD_METADATA_PREFIX, IfmapStrings.STD_METADATA_NS_URI);
             ssrc.publish(Requests.createPublishReq(publishDelete));
         } catch (IfmapErrorResult e) {
             LOGGER.severe("Error publishing update data: " + e);
@@ -106,6 +111,28 @@ public class DhcpStrategy extends PublishLogDataStrategy {
             Identifier ident1 = Identifiers.createAr(rootNode.path( "IP" ).getTextValue());
             Identifier ident2 = Identifiers.createDev(rootNode.path( "DHCPSERVERNAME" ).getTextValue());
             Document docMeta = getMetadataFactory().createAuthBy();
+            PublishUpdate publishUpdate = Requests.createPublishUpdate(ident1, ident2, docMeta, MetadataLifetime.session);
+            ssrc.publish(Requests.createPublishReq(publishUpdate));
+        } catch (IfmapErrorResult e) {
+            LOGGER.severe("Error publishing update data: " + e);
+        } catch (IfmapException e) {
+            LOGGER.severe("Error publishing update data: " + e);
+        }
+        }
+    }
+
+    public void testit(SSRC ssrc, JsonNode rootNode){
+        {
+        try {
+            Identifier ident1 = Identifiers.createAr(rootNode.path( "IP" ).getTextValue());
+            Identifier ident2 = Identifiers.createDev(rootNode.path( "DHCPSERVERNAME" ).getTextValue());
+            List<WlanSecurityType> ssidUnicastSecurity = new ArrayList<WlanSecurityType>();
+            ssidUnicastSecurity.add(new WlanSecurityType(WlanSecurityEnum.open, rootNode.path( "V" ).getTextValue()));
+            ssidUnicastSecurity.add(new WlanSecurityType(WlanSecurityEnum.open, rootNode.path( "V" ).getTextValue()));
+            ssidUnicastSecurity.add(new WlanSecurityType(WlanSecurityEnum.open, rootNode.path( "V" ).getTextValue()));
+            List<WlanSecurityType> ssidManagementSecurity = new ArrayList<WlanSecurityType>();
+            ssidManagementSecurity.add(new WlanSecurityType(WlanSecurityEnum.open, rootNode.path( "Y" ).getTextValue()));
+            Document docMeta = getMetadataFactory().createWlanInformation(rootNode.path( "A" ).getTextValue(),  ssidUnicastSecurity  , new WlanSecurityType(WlanSecurityEnum.open, rootNode.path( "C" ).getTextValue()) , ssidManagementSecurity);
             PublishUpdate publishUpdate = Requests.createPublishUpdate(ident1, ident2, docMeta, MetadataLifetime.session);
             ssrc.publish(Requests.createPublishReq(publishUpdate));
         } catch (IfmapErrorResult e) {
